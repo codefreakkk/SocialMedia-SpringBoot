@@ -1,5 +1,7 @@
 package com.example.devsinfo.services;
 
+import com.example.devsinfo.DTO.PostLikeCountDTO;
+import com.example.devsinfo.DTO.interfaces.IPostLikeCountDTO;
 import com.example.devsinfo.DTO.interfaces.IPostLikes;
 import com.example.devsinfo.exceptions.PostLikedException;
 import com.example.devsinfo.exceptions.PostNotFoundException;
@@ -12,7 +14,6 @@ import com.example.devsinfo.repository.PostLikesDao;
 import com.example.devsinfo.repository.UserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -79,7 +80,19 @@ public class PostLikesService implements IPostLikes {
     }
 
     @Override
-    public void getLikeCount(int postId) {
+    public PostLikeCountDTO getLikeCount(int postId) throws PostNotFoundException {
 
+        Optional<Posts> post = postDao.findById(postId);
+        if (post.isEmpty()) {
+            throw new PostNotFoundException("Post not found");
+        }
+
+        IPostLikeCountDTO postLikesCountDTO = postLikesDao.findLikeCountByPostId(postId);
+        int likeCount = postLikesCountDTO.getLikeCount();
+
+        return PostLikeCountDTO.builder()
+                .postId(postId)
+                .likeCount(likeCount)
+                .build();
     }
 }

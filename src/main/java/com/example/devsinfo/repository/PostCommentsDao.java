@@ -15,4 +15,7 @@ public interface PostCommentsDao extends JpaRepository<PostComments, Integer> {
     @Query(value = "SELECT * FROM post_comments p WHERE p.post_id = :postId", nativeQuery = true)
     List<PostComments> findByPostId(@Param("postId") int postId);
 
+    @Query(value = "SELECT pc.comment_content FROM post_comments pc WHERE pc.post_id = :postId", nativeQuery = true)
+    List<String> findCommentByPostId(@Param("postId") int postId);
+
 }

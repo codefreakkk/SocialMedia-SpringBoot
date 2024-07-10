@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Builder
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-public class PostResponse {
+public class PostResponseDTO {
     private int id;
     private String photo;
     private String description;
-    int likeCount;
-    List<String> comments;
+    private int likeCount;
+    private List<String> comments;
 }

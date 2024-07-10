@@ -1,14 +1,17 @@
 package com.example.devsinfo.services;
 
 import com.example.devsinfo.DTO.PostDTO;
+import com.example.devsinfo.DTO.interfaces.IPostDTO;
 import com.example.devsinfo.DTO.interfaces.IPostSlice;
 import com.example.devsinfo.DTO.response.GetAllPostResponse;
 import com.example.devsinfo.DTO.response.PostResponse;
+import com.example.devsinfo.DTO.response.PostResponseDTO;
 import com.example.devsinfo.exceptions.NotAuthorizedUserException;
 import com.example.devsinfo.exceptions.PostNotFoundException;
 import com.example.devsinfo.exceptions.UserNotFoundException;
 import com.example.devsinfo.models.Posts;
 import com.example.devsinfo.models.User;
+import com.example.devsinfo.repository.PostCommentsDao;
 import com.example.devsinfo.repository.PostDao;
 import com.example.devsinfo.repository.UserDao;
 import org.modelmapper.ModelMapper;
@@ -17,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,6 +36,9 @@ public class PostService implements IPostSlice {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private PostCommentsDao postCommentsDao;
 
     @Override
     public void createPost(String authHeader, PostDTO postDTO) throws UserNotFoundException {
@@ -95,19 +102,36 @@ public class PostService implements IPostSlice {
             throw new PostNotFoundException("Post not found");
         }
 
-        Posts currentPost = post.get();
+        IPostDTO postDTO = postDao.findPostById(postId);
+        List<String> comments = postCommentsDao.findCommentByPostId(postId);
+
         return PostResponse.builder()
-                .id(currentPost.getId())
-                .photo(currentPost.getPhoto())
-                .description(currentPost.getDescription())
-                .build();
+                .id(postDTO.getId())
+                .photo(postDTO.getPhoto())
+                .description(postDTO.getDescription())
+                .likeCount(postDTO.getLikeCount())
+                .comments(comments)
+                .build();   
     }
 
     @Override
     public GetAllPostResponse getAllPosts() {
-        List<Posts> posts = postDao.findAll();
-        List<PostDTO> allPosts = posts.stream().map(post ->
-                this.modelMapper.map(post, PostDTO.class)).collect(Collectors.toList());
+
+        List<IPostDTO> posts = postDao.findAllPosts();
+        List<PostResponseDTO> allPosts = new ArrayList<>();
+
+        for (IPostDTO post : posts) {
+            List<String> comments = postCommentsDao.findCommentByPostId(post.getId());
+            PostResponseDTO postResponseDTO = PostResponseDTO.builder()
+                    .id(post.getId())
+                    .photo(post.getPhoto())
+                    .description(post.getDescription())
+                    .likeCount(post.getLikeCount())
+                    .comments(comments)
+                    .build();
+
+            allPosts.add(postResponseDTO);
+        }
 
         return GetAllPostResponse.builder()
                 .success(true)

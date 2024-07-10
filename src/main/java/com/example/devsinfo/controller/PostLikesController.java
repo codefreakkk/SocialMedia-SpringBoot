@@ -1,5 +1,7 @@
 package com.example.devsinfo.controller;
 
+import com.example.devsinfo.DTO.PostLikeCountDTO;
+import com.example.devsinfo.DTO.interfaces.IPostLikeCountDTO;
 import com.example.devsinfo.services.PostLikesService;
 import com.example.devsinfo.utils.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,12 @@ public class PostLikesController {
         postLikesService.removeLike(postId);
         GenericResponse genericResponse = new GenericResponse("Like removed");
         return new ResponseEntity<>(genericResponse, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/{postId}/likes")
+    public ResponseEntity<PostLikeCountDTO> getPostLikesCount(@PathVariable int postId) {
+        PostLikeCountDTO postLikeCountDTO = postLikesService.getLikeCount(postId);
+        return new ResponseEntity<>(postLikeCountDTO, HttpStatus.OK);
     }
 
 }

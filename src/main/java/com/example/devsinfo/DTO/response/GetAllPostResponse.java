@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class GetAllPostResponse {
     private boolean success;
-    private List<PostDTO> allPost;
+    private List<PostResponseDTO> allPost;
 }
