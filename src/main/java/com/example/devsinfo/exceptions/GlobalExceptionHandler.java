@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.security.SignatureException;
 import java.util.HashMap;
@@ -21,6 +22,18 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<ErrorDetails> fileException(IOException ioException, WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails(ioException.getMessage(), webRequest.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ErrorDetails> fileUploadException(FileUploadException fileUploadException, WebRequest webRequest) {
+        ErrorDetails errorDetails = new ErrorDetails(fileUploadException.getMessage(), webRequest.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     @ExceptionHandler(DuplicateUserException.class)
     public ResponseEntity<ErrorDetails> duplicateUserException(DuplicateUserException duplicateUserException, WebRequest webRequest) {

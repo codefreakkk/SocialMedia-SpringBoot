@@ -3,12 +3,16 @@ package com.example.devsinfo.controller;
 import com.example.devsinfo.DTO.PostDTO;
 import com.example.devsinfo.DTO.response.GetAllPostResponse;
 import com.example.devsinfo.DTO.response.PostResponse;
+import com.example.devsinfo.exceptions.UserNotFoundException;
 import com.example.devsinfo.services.PostService;
 import com.example.devsinfo.utils.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RequestMapping("/api/v1/posts")
 @RestController
@@ -18,8 +22,8 @@ public class PostController {
     private PostService postService;
 
     @PostMapping
-    public ResponseEntity<GenericResponse> createPost(@RequestHeader("Authorization") String authHeader, @RequestBody PostDTO postDTO) {
-        postService.createPost(authHeader, postDTO);
+    public ResponseEntity<GenericResponse> createPost(@RequestParam("file") MultipartFile file, @RequestParam("description") String description) throws UserNotFoundException, IOException {
+        postService.createPost(description, file);
         GenericResponse genericResponse = new GenericResponse("Post created");
         return new ResponseEntity<>(genericResponse, HttpStatus.CREATED);
     }

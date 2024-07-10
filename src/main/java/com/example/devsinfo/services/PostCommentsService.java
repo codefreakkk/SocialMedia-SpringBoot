@@ -1,7 +1,7 @@
 package com.example.devsinfo.services;
 
 import com.example.devsinfo.DTO.CommentsDTO;
-import com.example.devsinfo.DTO.interfaces.IPostCommentsSlice;
+import com.example.devsinfo.DTO.interfaces.IPostComments;
 import com.example.devsinfo.DTO.response.GetAllPostCommentsResponse;
 import com.example.devsinfo.exceptions.CommentNotFoundException;
 import com.example.devsinfo.exceptions.PostNotFoundException;
@@ -18,7 +18,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class PostCommentsService implements IPostCommentsSlice {
+public class PostCommentsService implements IPostComments {
 
     @Autowired
     private PostDao postDao;

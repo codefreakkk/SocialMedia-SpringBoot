@@ -72,7 +72,7 @@ public class PostLikesService implements IPostLikes {
     }
 
     @Override
-    public void removeLike(int postId) throws UserNotFoundException, PostNotFoundException{
+    public void removeLike(int postId) throws UserNotFoundException, PostNotFoundException {
         String email = this.getUserEmail();
         User user = this.getUserByEmail(email);
 

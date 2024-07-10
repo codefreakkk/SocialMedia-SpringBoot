@@ -2,10 +2,11 @@ package com.example.devsinfo.services;
 
 import com.example.devsinfo.DTO.PostDTO;
 import com.example.devsinfo.DTO.interfaces.IPostDTO;
-import com.example.devsinfo.DTO.interfaces.IPostSlice;
+import com.example.devsinfo.DTO.interfaces.IPosts;
 import com.example.devsinfo.DTO.response.GetAllPostResponse;
 import com.example.devsinfo.DTO.response.PostResponse;
 import com.example.devsinfo.DTO.response.PostResponseDTO;
+import com.example.devsinfo.exceptions.FileUploadException;
 import com.example.devsinfo.exceptions.NotAuthorizedUserException;
 import com.example.devsinfo.exceptions.PostNotFoundException;
 import com.example.devsinfo.exceptions.UserNotFoundException;
@@ -19,14 +20,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
-public class PostService implements IPostSlice {
+public class PostService implements IPosts {
 
     @Autowired
     private PostDao postDao;
@@ -40,8 +43,29 @@ public class PostService implements IPostSlice {
     @Autowired
     private PostCommentsDao postCommentsDao;
 
+    @Autowired
+    private CloudinaryService cloudinaryService;
+
+    private void validateImage(MultipartFile file) throws FileUploadException {
+        String contentType = file.getContentType();
+        long size = file.getSize();
+
+        if (file == null) {
+            throw new FileUploadException("File not found");
+        }
+
+        if (file.getSize() > size) {
+            throw new FileUploadException("File must be less than 10 MB");
+        }
+
+        List<String> extensions = List.of("image/jpeg", "image/jpg", "image/png");
+        if (!extensions.contains(contentType)) {
+            throw new FileUploadException("File not supported");
+        }
+    }
+
     @Override
-    public void createPost(String authHeader, PostDTO postDTO) throws UserNotFoundException {
+    public void createPost(String description, MultipartFile file) throws UserNotFoundException, IOException, FileUploadException {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userDao.findByEmail(email);
 
@@ -49,9 +73,16 @@ public class PostService implements IPostSlice {
             throw new UsernameNotFoundException("User not found");
         }
 
+        // validate file
+        this.validateImage(file);
+
+        Map uploadResult = cloudinaryService.upload(file);
+        String url = (String) uploadResult.get("url");
+        System.out.println(url);
+
         Posts post = Posts.builder()
-                .photo(postDTO.getPhoto())
-                .description(postDTO.getDescription())
+                .photo(url)
+                .description(description)
                 .user(user)
                 .build();
 
